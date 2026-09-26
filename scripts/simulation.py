@@ -1,7 +1,7 @@
 # what the network is made up of
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, Optional
+from typing import Optional
 
 
 # literally just allows us to check the file type using type()
@@ -16,7 +16,7 @@ class FileSystemNode:
     type: FileType
     contents: str = ""
     parent: Optional['FileSystemNode'] = None
-    child: Dict[str,'FileSystemNode'] = field(default_factory=dict)
+    child: dict = field(default_factory=dict)
     # permissions: int=0o644
     # macb etc?
     def get_path(self) -> str:
@@ -31,7 +31,7 @@ class Computer:
     hostname: str
     ip_address: str
     filesystem: FileSystemNode
-    process_list: Dict[str, dict] = field(default_factory=dict)
+    process_list: dict = field(default_factory=dict)
     is_compromise: bool = False
 
     def __post_init__(self):
@@ -56,8 +56,8 @@ class Computer:
 # holds the pc network
 class Network:
     def __init__(self) -> None:
-        self.computers: Dict[str, Computer] = {} # hostname -> computer
-        self.ip_map: Dict[str, str] = {} # ipaddress -> hostname
+        self.computers: dict = {} # hostname -> computer
+        self.ip_map: dict = {} # ipaddress -> hostname
         self.connections: set[tuple[str,str]] = set() # (hostname1, hostname2)
 
     def add_computer(self,computer: Computer) -> None:
