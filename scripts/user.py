@@ -1,10 +1,12 @@
 from typing import Optional
 
+from simulation import Computer
+
 
 class User:
     def __init__(self):
-        self.network = setup_sample_network()
-        self.current_location: Computer = self.network.computers["home-pc"]
+        # self.network = setup_sample_network()
+        # self.current_location: Computer = self.network.computers["home-pc"]
         self.session_log: list[str] = []
 
     def execute_command(self, command: str) -> str:

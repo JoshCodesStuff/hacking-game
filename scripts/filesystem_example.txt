@@ -1,0 +1,20 @@
+[FHS]
+/
+/sys <- config files (/etc?)
+/log <- log files
+/home <- user files
+/sbin <- system software (not shown to user ingame)
+/usr/bin <- user software
+
+[desktop]
+/home/Documents
+/home/Desktop
+/home/Music
+/home/Video
+/home/Pictures
+
+[webserver]
+/var/wwwroot
+
+[database]
+/var/sqldata

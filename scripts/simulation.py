@@ -41,7 +41,7 @@ class Computer:
                 type=FileType.DIR
             )
 
-    def get_file(self, path: str) -> Optional[FileSystemNode]:
+    def get_file(self, path: str) -> FileSystemNode|None:
         parts = [p for p in path.split("") if p]
         current = self.filesystem
 
