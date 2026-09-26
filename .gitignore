@@ -1,0 +1,16 @@
+# Godot
+.godot/
+*.exe
+*.dll
+*.so
+*.dylib
+user://
+*.translation
+*.import
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
