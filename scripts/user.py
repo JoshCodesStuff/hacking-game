@@ -1,6 +1,6 @@
 from typing import Optional
 
-from simulation import Computer
+from simulation import Computer,FileType,FileSystemNode
 
 
 class User:
@@ -8,6 +8,16 @@ class User:
         # self.network = setup_sample_network()
         # self.current_location: Computer = self.network.computers["home-pc"]
         self.session_log: list[str] = []
+        self.help = {
+            "ls": "list directory contents",
+            "whoami": "prints effective user name",
+            "cd": "change directory",
+            "mv": "move (rename) files",
+            "rm": "remove files or directories",
+            "cat": "concatenate files and print output",
+            "scp": "secure file copy",
+            "ssh": "remote login client"
+        }
 
     def execute_command(self, command: str) -> str:
         """Parse and execute a command"""
@@ -58,7 +68,7 @@ class User:
         """Print current location"""
         return self.current_location.hostname
 
-    def _cmd_cat(self, filepath: Optional[str]) -> str:
+    def _cmd_cat(self, filepath: str) -> str | None:
         """Read a file"""
         if not filepath:
             return "Usage: cat [filepath]"

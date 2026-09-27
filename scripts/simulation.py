@@ -57,7 +57,7 @@ class Computer:
 class Network:
     def __init__(self) -> None:
         self.computers: dict = {} # hostname -> computer
-        self.ip_map: dict = {} # ipaddress -> hostname
+        self.ip_map: dict = {} # ipaddress -> hostname (DNS???)
         self.connections: set[tuple[str,str]] = set() # (hostname1, hostname2)
 
     def add_computer(self,computer: Computer) -> None:
