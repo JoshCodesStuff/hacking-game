@@ -1,6 +1,6 @@
 from typing import Optional
 
-from simulation import Computer,FSNodeType,File
+from simulation import Computer, Directory, File
 
 
 class User:

@@ -1,5 +1,6 @@
 # what the network is made up of
 from dataclasses import dataclass, field
+from ipaddress import ip_address
 from typing import Optional
 
 
@@ -29,7 +30,7 @@ class FSNode:
     def get_permissions(self) -> str:
         """returns a string with the permissions of the
         File or Directory + Owner name in format `-rwxrwx root`"""
-
+        print(self.permissions)
 
 
 @dataclass
@@ -84,45 +85,23 @@ class File(FSNode):
 @dataclass
 class Computer:
     hostname: str
+    users: dict # store a list of users... still haven't decided if adding admin users via group is cool
     ip_address: str
     filesystem: Directory = field(
         default_factory=lambda: Directory(name="/", owner="root"))
     process_list: dict = field(default_factory=dict)
-    is_compromise: bool = False
 
 
-# holds the pc network
+# holds the networked pc's
+@dataclass
 class Network:
-    def __init__(self) -> None:
-        self.computers: dict = {} # hostname -> computer
-        self.ip_map: dict = {} # ipaddress -> hostname (DNS???)
-        self.connections: set[tuple[str,str]] = set() # (hostname1, hostname2)
+    network: dict # hostname: [computer, ip_addr]
 
     def add_computer(self,computer: Computer) -> None:
-        self.computers[computer.hostname] = computer
-        self.ip_map[computer.ip_address] = computer.hostname
+        self.network[computer.ip_address] = computer
 
-    def resolve_target(self, user_input: str) -> Optional[Computer]:
-        if user_input in self.computers:
-            return self.computers[user_input]
-        if user_input in self.ip_map:
-            return self.computers[self.ip_map[user_input]]
-
-        matches = [c for hostname, c in self.computers.items() if hostname.startswith(user_input)]
-        if len(matches) == 1:
-            return matches[0]
+    def resolve_target(self, user_input_ip_addr: str) -> Computer | None:
+        if user_input_ip_addr in self.network:
+            return self.network[self.network[user_input_ip_addr]]
 
         return None
-
-    def connect(self, hostname1: str, hostname2: str):
-            """Add edge between two computers"""
-            self.connections.add((hostname1, hostname2))
-            self.connections.add((hostname2, hostname1))  # Bidirectional
-
-    def get_neighbors(self, hostname: str) -> list[Computer]:
-        """Get computers directly connected"""
-        neighbors = []
-        for h1, h2 in self.connections:
-            if h1 == hostname:
-                neighbors.append(self.computers[h2])
-        return neighbors
