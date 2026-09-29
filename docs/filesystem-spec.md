@@ -31,14 +31,34 @@ help <- prints help text
 - Can multiple programs run simultaneously on one computer, or is it single-threaded?
 
 
-I've added a permission model:
+I've added a permission model (updated):
 
-```py
-permissions: dict ={
-        f"{owner}":[1,0,0],
-        f"{group}":[1,0,0],
-        "others":[1,0,0]
-    }
+```python
+# directories
+permissions = {
+    "owner": {"read": 1, "write": 1},
+    "others": {"read": 1, "write": 0}
+}
+
+# files
+permissions: dict = field(default_factory=lambda: {
+	"owner": {"read": 1, "write": 1},
+	"others": {"read": 0, "write": 0}
+}
 ```
 
-This will allow the user to read and write files they own, read files they don't own, and won't be able to execute anything unless it is approved.
+and a function to check authorisation which takes the owner and action (`rw`) intended to be performed, which can be called against the filesystem object, first the `pwd` then the `target` file. If both resolve true, we are golden, user can do whatever they want:
+
+```python
+def authorised(self, username: str, action: str) -> bool:
+	if username == self.owner:
+		return bool(self.permissions["owner"][action])
+	return bool(self.permissions["others"][action])
+```
+
+This permission design allows the user to read and write files they own. They will be able to read on directories to see files exist, but won't be able to view the file's contents if they are not an owner. 
+
+> [!NOTE] 
+> I haven't got to a point where execute (`x`) is worth adding yet. This is intended so that users can guard files when (if) an attacker is on their computer.
+
+

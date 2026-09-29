@@ -1,6 +1,5 @@
 # what the network is made up of
 from dataclasses import dataclass, field
-from ipaddress import ip_address
 from typing import Optional
 
 
@@ -13,9 +12,20 @@ class FSNode:
     parent: Optional["FSNode"] = None
 
     def authorised(self, username: str, action: str) -> bool:
+        p = 0
+        match action:
+            case 'read' | 'r':
+                p=0
+            case 'write' | 'w':
+                p=1
+            # case 'exec'|'execute'|'x':
+            #     p=2
+            case _:
+                raise ValueError
+
         if username == self.owner:
-            return bool(self.permissions["owner"][action])
-        return bool(self.permissions["others"][action])
+            return bool(self.permissions["owner"][p])
+        return bool(self.permissions["others"][p])
 
     def get_path(self) -> str:
         """walk backwards to root to find the path of the file."""
@@ -27,7 +37,7 @@ class FSNode:
             current = current.parent
         return "/" + "/".join(reversed(path_parts))
 
-    def get_permissions(self) -> str:
+    def get_permissions(self):
         """returns a string with the permissions of the
         File or Directory + Owner name in format `-rwxrwx root`"""
         print(self.permissions)
@@ -37,11 +47,13 @@ class FSNode:
 class Directory(FSNode):
     children: dict = field(default_factory=dict)
     permissions: dict = field(default_factory=lambda: {
-        "owner": {"read": 1, "write": 1},
-        "others": {"read": 1, "write": 0}
+        "owner": [1,1],
+        "others": [1,0]
     })
 
-    def make_child_directory(self, name, user):
+    # create dir
+    def make_dir(self, name, user):
+        """create a child directory"""
         if len(name) < 1:
             raise ValueError("Cannot have unnamed directory.")
         if self.authorised(user, "write"):
@@ -50,7 +62,9 @@ class Directory(FSNode):
         else:
             raise PermissionError("Permission denied, no write access")
 
-    def make_child_file(self, name, user, contents=""):
+    # create file
+    def make_file(self, name, user, contents=""):
+        """create a file in a directory. prevents a file being a parent of a file"""
         if len(name) < 1:
             raise ValueError("Cannot have unnamed file.")
         if self.authorised(user, "write"):
@@ -59,26 +73,33 @@ class Directory(FSNode):
         else:
             raise PermissionError("Permission denied, no write access")
 
+    # delete file
+    def del_file(self, name, user, contents=""):
+        """create a file in a directory. prevents a file being a parent of a file"""
+        if len(name) < 1:
+            raise ValueError("Cannot have unnamed file.")
+        if self.authorised(user, "write"):
+            child = File(name=name, parent=self, owner=user, contents=contents)
+            self.children[name]=child
+        else:
+            raise PermissionError("Permission denied, no write access")
+
+    # read dir
+    # update dir
+    # delete dir
+
 
 @dataclass
 class File(FSNode):
     contents: str = ""
     permissions: dict = field(default_factory=lambda: {
-        "owner": {"read": 1, "write": 1},
-        "others": {"read": 0, "write": 0}
+        "owner": [1,1],
+        "others": [0,0]
     })
 
-    """
-    read (
-    - [x] path <- from parent class
-    - [ ] contents
-    - [ ] permissions <- from parent class)
-    """
-    # update (
-    # - modify contents,
-    # - permissions,
-    # - path?)
-    # delete
+    # read file
+    # update file
+    # delete file
 
 
 # the nodes which reside within the network map

@@ -10,7 +10,7 @@ Build the file system so that it can be interacted with in a pseudo shell better
 
 Unit Tests:
 
-- [ ] create file
+- [x] create file
 - [ ] read file
 - [ ] update file
 - [ ] delete file
