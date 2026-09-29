@@ -11,17 +11,10 @@ class FSNode:
     permissions: dict
     parent: Optional["FSNode"] = None
 
-    def can_read(self, username: str) -> bool:
-        """If can_read returns false: no viewing file contents."""
+    def authorised(self, username: str, action: str) -> bool:
         if username == self.owner:
-            return bool(self.permissions["owner"]["read"])
-        return bool(self.permissions["others"]["read"])
-
-    def can_write(self, username: str) -> bool:
-        """If can_write returns false: no deleting, no editing, no chmod"""
-        if username == self.owner:
-            return bool(self.permissions["owner"]["write"])
-        return bool(self.permissions["others"]["write"])
+            return bool(self.permissions["owner"][action])
+        return bool(self.permissions["others"][action])
 
     def get_path(self) -> str:
         """walk backwards to root to find the path of the file."""
@@ -33,6 +26,11 @@ class FSNode:
             current = current.parent
         return "/" + "/".join(reversed(path_parts))
 
+    def get_permissions(self) -> str:
+        """returns a string with the permissions of the
+        File or Directory + Owner name in format `-rwxrwx root`"""
+
+
 
 @dataclass
 class Directory(FSNode):
@@ -43,15 +41,19 @@ class Directory(FSNode):
     })
 
     def make_child_directory(self, name, user):
-        if self.can_write(user):
+        if len(name) < 1:
+            raise ValueError("Cannot have unnamed directory.")
+        if self.authorised(user, "write"):
             child = Directory(name=name,parent=self, owner=user)
             self.children[name]=child
         else:
             raise PermissionError("Permission denied, no write access")
 
     def make_child_file(self, name, user, contents=""):
-        if self.can_write(user):
-            child = File(name=name, parent=self, owner=user)
+        if len(name) < 1:
+            raise ValueError("Cannot have unnamed file.")
+        if self.authorised(user, "write"):
+            child = File(name=name, parent=self, owner=user, contents=contents)
             self.children[name]=child
         else:
             raise PermissionError("Permission denied, no write access")
@@ -67,9 +69,9 @@ class File(FSNode):
 
     """
     read (
-    - path,
-    - contents,
-    - permissions)
+    - [x] path <- from parent class
+    - [ ] contents
+    - [ ] permissions <- from parent class)
     """
     # update (
     # - modify contents,
@@ -83,24 +85,10 @@ class File(FSNode):
 class Computer:
     hostname: str
     ip_address: str
-    filesystem: Directory
+    filesystem: Directory = field(
+        default_factory=lambda: Directory(name="/", owner="root"))
     process_list: dict = field(default_factory=dict)
     is_compromise: bool = False
-
-    def __post_init__(self):
-        if self.filesystem is None:
-            self.filesystem = Directory(name="/", owner="root")
-
-    def get_file(self, path: str) -> File|None:
-        parts = [p for p in path.split("") if p]
-        current = self.filesystem
-
-        for part in parts:
-            if part in current.child:
-                current=current.child[part]
-            else:
-                return None
-        return current
 
 
 # holds the pc network
