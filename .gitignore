@@ -15,5 +15,8 @@ user://
 *.swo
 *~
 
+# Python
+__pycache__/
+
 # Obsidian
 .obsidian/
