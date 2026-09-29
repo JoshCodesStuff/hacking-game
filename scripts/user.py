@@ -1,6 +1,6 @@
 from typing import Optional
 
-from simulation import Computer,FileType,FileSystemNode
+from simulation import Computer,FSNodeType,File
 
 
 class User:
@@ -77,7 +77,7 @@ class User:
         if not file_node:
             return f"cat: {filepath}: No such file or directory"
 
-        if file_node.type == FileType.DIR:
+        if file_node.type == FSNodeType.DIR:
             return f"cat: {filepath}: Is a directory"
 
         return file_node.contents
